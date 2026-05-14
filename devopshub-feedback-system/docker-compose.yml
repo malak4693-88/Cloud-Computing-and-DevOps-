@@ -1,0 +1,41 @@
+services:
+  redis:
+    image: redis:7
+    container_name: devopshub-redis
+    volumes:
+      - redis-data:/data
+    networks:
+      - devopshub-network
+    command: redis-server --appendonly yes
+
+  message-collector:
+    build: ./message-collector
+    container_name: devopshub-message-collector
+    ports:
+      - "5000:5000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+    networks:
+      - devopshub-network
+
+  dashboard:
+    build: ./dashboard
+    container_name: devopshub-dashboard
+    ports:
+      - "5001:5001"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+    networks:
+      - devopshub-network
+
+volumes:
+  redis-data:
+
+networks:
+  devopshub-network:
