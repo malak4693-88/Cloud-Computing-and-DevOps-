@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template_string
+from flask import Flask, request, render_template_string, redirect
 import redis
 import os
 
@@ -75,7 +75,8 @@ HTML_PAGE = """
 @app.route("/")
 def index():
     r.incr("visit_count")
-    return render_template_string(HTML_PAGE, success=False)
+    success = request.args.get("success") == "true"
+    return render_template_string(HTML_PAGE, success=success)
 
 @app.route("/submit", methods=["POST"])
 def submit():
@@ -84,7 +85,7 @@ def submit():
     if message:
         r.rpush("messages", message)
 
-    return render_template_string(HTML_PAGE, success=True)
+    return redirect("/?success=true")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
